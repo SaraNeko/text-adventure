@@ -12,6 +12,7 @@ namespace text_adventure
         string Description;
 
         public Dictionary<string, Direction> Exits = new Dictionary<string, Direction>();
+        public List<Item> CollectibleItems = new List<Item>();
 
         public Place(string name, string description)
         {
@@ -25,6 +26,30 @@ namespace text_adventure
             Console.WriteLine(Name);
             Console.ResetColor();
             Console.WriteLine(Description);
+            foreach (Item item in CollectibleItems) { Console.WriteLine(item.AreaText); }
+        }
+
+        public Item GetBlockerItemByName(string name)
+        {
+            name = name.ToLower();
+            foreach (Direction direction in Exits.Values)
+            {
+                Item blocker = direction.Blocker;
+                if (blocker == null) { continue; }
+
+                if (blocker.Name.ToLower() == name) { return blocker; }
+            }
+            return null;
+        }
+
+        public Item GetCollectibleItemByName(string name)
+        {
+            name = name.ToLower();
+            foreach (Item item in CollectibleItems)
+            {
+                if (item.Name.ToLower() == name) { return item; }
+            }
+            return null;
         }
     }
 }

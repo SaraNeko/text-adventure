@@ -8,15 +8,19 @@ namespace text_adventure
 {
     class Item
     {
-        string Description;
-        string ExtendedDescription;
+        public string Name;
+        public string Description;
+        public string ExtendedDescription;
+        public string AreaText;
         public bool CanBePickedUp { get; }
-        public bool IsBlocking { get; }
+        public bool IsBlocking;
 
-        public Item(string description, string extendedDescription, bool canBePickedUp = false, bool isBlocking = false)
+        public Item(string name, string description, string extendedDescription, string areaText = null, bool canBePickedUp = false, bool isBlocking = false)
         {
+            Name = name;
             Description = description;
             ExtendedDescription = extendedDescription;
+            AreaText = areaText;
             CanBePickedUp = canBePickedUp;
             IsBlocking = isBlocking;
         }
@@ -24,6 +28,11 @@ namespace text_adventure
         public void Describe()
         {
             Console.WriteLine(Description);
+        }
+
+        public void Examine()
+        {
+            Console.WriteLine(ExtendedDescription);
         }
     }
 }
