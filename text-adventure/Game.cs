@@ -8,20 +8,25 @@ namespace text_adventure
 {
     class Game
     {
+        bool IsRunning;     // Shows whether or not the game is still running.
+
         static string PROMPT = "\n> ";
 
         Player Player;
+
         Place Room1;
         Item Room1DoorKey;
         Place Room2;
         Place Room3;
+        Place Outside;
+        Place EndingLocation;
+        static string EndingText;
 
-        bool IsRunning;     // Shows whether or not the game is still running.
 
         public Game()
         {
             IsRunning = true;
-
+            Console.Title = "Emrao Adventure";
             SetupMap();
         }
 
@@ -29,9 +34,12 @@ namespace text_adventure
         {
             Item StoneWall = new Item("Stone Wall", "A large stone wall stands in your way.", "The wall won't budge.", isBlocking: true);
 
-            Room1 = new Place("Room 1", "Looks very oney. There is an arch to the north leading to another room, and a small wooden door to the west.");
-            Room2 = new Place("Room 2", "Looks very twoey. There is an arch to the south leading to another room.");
-            Room3 = new Place("Room 3", "Looks very threey. There is a small wooden door to the east.");
+            Room1 = new Place("Room 1", "Looks very oney. There is an archway to the north leading to another room, and a small wooden door to the west.");
+            Room2 = new Place("Room 2", "Looks very twoey. There is an archway to the south leading to another room.");
+            Room3 = new Place("Room 3", "Looks very threey. There is a small wooden door to the east, and a heavy iron door to the west.");
+            Outside = new Place("Outside", "Freedom!");
+            EndingLocation = Outside;
+            EndingText = "You slowly force open the iron door and slip through, where you find yourself back in the outside world. You escaped!\n";
 
             Room1.Exits[Direction.NORTH] = new Direction(Room2);
             Room1.Exits[Direction.EAST] = new Direction(StoneWall);
@@ -51,13 +59,13 @@ namespace text_adventure
             Room3.Exits[Direction.NORTH] = new Direction(StoneWall);
             Room3.Exits[Direction.EAST] = new Direction(Room1);
             Room3.Exits[Direction.SOUTH] = new Direction(StoneWall);
-            Room3.Exits[Direction.WEST] = new Direction(StoneWall);
+            Item ExitDoor = new Item("Iron Door", "There is a heavy iron door in the wall.", "The door is heavy, but appears to be unlocked.");
+            Room3.Exits[Direction.WEST] = new Direction(Outside, ExitDoor);
         }
-        // this is the game class :3 you're a crute. ♥
 
         public void Run()
         {
-            Console.WriteLine("Welcome to Kittu Land >;3\nYou find yourself in a strange room...\n");
+            Program.SlowPrint("Welcome to Emrao Land >;3\nYou find yourself in a strange room...\n");
 
             Console.Write("Enter your name: ");
             string name = Console.ReadLine();
@@ -70,9 +78,14 @@ namespace text_adventure
             while (IsRunning)
             {
                 ProcessCommand();
+                if (Player.Location == EndingLocation)
+                {
+                    Program.SlowPrint(EndingText);
+                    Quit();
+                }
             }
 
-            Console.WriteLine("Thanks for coming to Kittu Land >:3\nYou'll be back soon! (Press Enter to exit.)");
+            Program.SlowPrint("Thanks for coming to Emrao Land >:3\nYou'll be back soon! (Press Enter to exit.)");
             Console.ReadLine();
         }
 
@@ -88,7 +101,6 @@ namespace text_adventure
             {
                 case "quit":
                 case "exit":
-                case "bye":
                     Quit();
                     break;
 
@@ -102,7 +114,7 @@ namespace text_adventure
                 case "run":
                     if (commandWords.Length == 1)
                     {
-                        Console.WriteLine($"{action} where?");
+                        Program.SlowPrint($"{action} where?");
                         break;
                     }
                     Move(commandWords[1]);
@@ -118,7 +130,7 @@ namespace text_adventure
                 case "grab":
                     if (commandWords.Length == 1)
                     {
-                        Console.WriteLine($"{action} what?");
+                        Program.SlowPrint($"{action} what?");
                         break;
                     }
                     Take(commandWords[1]);
@@ -128,7 +140,7 @@ namespace text_adventure
                 case "throw":
                     if (commandWords.Length == 1)
                     {
-                        Console.WriteLine($"{action} what?");
+                        Program.SlowPrint($"{action} what?");
                         break;
                     }
                     Drop(commandWords[1]);
@@ -138,7 +150,7 @@ namespace text_adventure
                 case "inspect":
                     if (commandWords.Length == 1)
                     {
-                        Console.WriteLine($"{action} what?");
+                        Program.SlowPrint($"{action} what?");
                         break;
                     }
                     Examine(commandWords[1]);
@@ -147,12 +159,12 @@ namespace text_adventure
                 case "use":
                     if (commandWords.Length == 1)
                     {
-                        Console.WriteLine("Use what on what?");
+                        Program.SlowPrint("Use what on what?");
                         break;
                     }
                     else if (new int[] { 2, 3 }.Contains(commandWords.Length))
                     {
-                        Console.WriteLine($"Use {commandWords[1]} on what?");
+                        Program.SlowPrint($"Use {commandWords[1]} on what?");
                     }
                     if (!(commandWords[2] == "on")) { goto default; }
                     Use(commandWords[1], commandWords[3]);
@@ -162,23 +174,29 @@ namespace text_adventure
                 case "hi":
                 case "hey":
                 case "hej":
-                    Console.WriteLine("You hear the echo of your own greeting."); // do diff answers.
+                    int random = new Random().Next(0, 5);
+                    if (random == 0) { Program.SlowPrint($"Hello, {Player.Name} >:)."); }
+                    else { Program.SlowPrint("You hear the echo of your own greeting."); }
                     break;
 
                 case "thanks":
                 case "thank":
-                    Console.WriteLine("Somehow you don't feel welcome.");
+                    Program.SlowPrint("Somehow you don't feel welcome.");
                     break;
 
                 case "ok":
                 case "okay":
                 case "okey":
                 case "okej":
-                    Console.WriteLine("Ok.");
+                    Program.SlowPrint("Ok.");
+                    break;
+
+                case "emrao":
+                    Program.SlowPrint("emrao.");
                     break;
 
                 default:
-                    Console.WriteLine("ALET. I DO NOT UNDERSTEND THIS COMMAND.");
+                    Program.SlowPrint("ALET. I DO NOT UNDERSTEND THIS COMMAND.");
                     break;
             }
         }
@@ -197,7 +215,7 @@ namespace text_adventure
         {
             if (!(new string[] { Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST }.Contains(direction)))
             {
-                Console.WriteLine($"I don't know the direction '{direction}'.");
+                Program.SlowPrint($"I don't know the direction '{direction}'.");
                 return;
             }
 
@@ -219,7 +237,7 @@ namespace text_adventure
         {
             if (Player.Inventory.Count == 0)
             {
-                Console.WriteLine("You have no items.");
+                Program.SlowPrint("You have no items.");
                 return;
             }
 
@@ -235,19 +253,19 @@ namespace text_adventure
             Item item = Player.Location.GetCollectibleItemByName(itemName);
             if (item == null)
             {
-                Console.WriteLine($"There is no '{itemName}'.");
+                Program.SlowPrint($"There is no '{itemName}'.");
                 return;
             }
 
             if (!item.CanBePickedUp)
             {
-                Console.WriteLine("You can't pick that up.");
+                Program.SlowPrint("You can't pick that up.");
                 return;
             }
 
             Player.Location.CollectibleItems.Remove(item);
             Player.Inventory.Add(item);
-            Console.WriteLine($"Took {item.Name}.");
+            Program.SlowPrint($"Took {item.Name}.");
         }
 
         private void Drop(string itemName)
@@ -255,13 +273,13 @@ namespace text_adventure
             Item item = Player.GetInventoryItemByName(itemName);
             if (item == null)
             {
-                Console.WriteLine($"You don't have a '{itemName}'.");
+                Program.SlowPrint($"You don't have a '{itemName}'.");
                 return;
             }
 
             Player.Inventory.Remove(item);
             Player.Location.CollectibleItems.Add(item);
-            Console.WriteLine($"Dropped {item.Name}.");
+            Program.SlowPrint($"Dropped {item.Name}.");
         }
 
         private void Examine(string itemName)
@@ -271,7 +289,7 @@ namespace text_adventure
                 ?? Player.Location.GetBlockerItemByName(itemName);
             if (item == null)
             {
-                Console.WriteLine($"There is no '{itemName}'.");
+                Program.SlowPrint($"There is no '{itemName}'.");
                 return;
             }
 
@@ -284,15 +302,16 @@ namespace text_adventure
             Item item1 = Player.GetInventoryItemByName(item1Name);
             if (item1 == null)
             {
-                Console.WriteLine($"You don't have a '{item1Name}'.");
+                Program.SlowPrint($"You don't have a '{item1Name}'.");
                 return;
             }
 
             Item item2 = Player.Location.GetBlockerItemByName(item2Name)
-                         ?? Player.Location.GetCollectibleItemByName(item2Name);
+                         ?? Player.Location.GetCollectibleItemByName(item2Name)
+                         ?? Player.GetInventoryItemByName(item2Name);
             if (item2 == null)
             {
-                Console.WriteLine($"There is no '{item2Name}'.");
+                Program.SlowPrint($"There is no '{item2Name}'.");
                 return;
             }
 
@@ -303,18 +322,18 @@ namespace text_adventure
                 {
                     if (!Door.IsBlocking)
                     {
-                        Console.WriteLine("The door is already unlocked.");
+                        Program.SlowPrint("The door is already unlocked.");
                         return;
                     }
 
                     Door.IsBlocking = false;
                     Door.ExtendedDescription = "The door is unlocked.";
-                    Console.WriteLine("You unlock the door.");
+                    Program.SlowPrint("You unlock the door.");
                     return;
                 }
             }
 
-            Console.WriteLine("Nothing interesting happens.");
+            Program.SlowPrint("Nothing interesting happens.");
         }
     }
 }

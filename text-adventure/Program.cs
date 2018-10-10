@@ -14,5 +14,16 @@ namespace text_adventure
             Game game = new Game();
             game.Run();
         }
+
+        public static void SlowPrint(string str, int msDelay = 60)
+        {
+            foreach (char c in str)
+            {
+                Console.Write(c);
+                if (c == ' ') { continue; }  // Don't wait on spaces - feels unnatural.
+                System.Threading.Thread.Sleep(msDelay);
+            }
+            Console.WriteLine();
+        }
     }
 }

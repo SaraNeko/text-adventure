@@ -27,12 +27,12 @@ namespace text_adventure
 
         public void Describe()
         {
-            Console.WriteLine(Description);
+            Program.SlowPrint(Description);
         }
 
         public void Examine()
         {
-            Console.WriteLine(ExtendedDescription);
+            Program.SlowPrint(ExtendedDescription);
         }
     }
 }

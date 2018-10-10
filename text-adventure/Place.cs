@@ -25,8 +25,8 @@ namespace text_adventure
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine(Name);
             Console.ResetColor();
-            Console.WriteLine(Description);
-            foreach (Item item in CollectibleItems) { Console.WriteLine(item.AreaText); }
+            Program.SlowPrint(Description);
+            foreach (Item item in CollectibleItems) { Program.SlowPrint(item.AreaText); }
         }
 
         public Item GetBlockerItemByName(string name)
